@@ -1,101 +1,254 @@
-import Image from "next/image";
+"use client";
+
+import { Button } from "@/components/ui";
+import { Container, TableValues, TextareaCode } from "@/components/shared";
+import { TextareaResult } from "@/components/shared/textarea-result";
+import { figures, letters, separators, serviceWords } from "@/lib/constants";
+import { useState } from "react";
+import {
+  formattingValues,
+  isSeparator,
+  isServiceWord,
+  isValidNumber,
+  isValidWord,
+} from "@/lib";
+import { ResultValue, Value } from "@/@types/value";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [identifiers, setIdentifiers] = useState<Value[]>([]);
+  const [numbers, setNumbers] = useState<Value[]>([]);
+  const [result, setResult] = useState<ResultValue[]>([]);
+  const [code, setCode] = useState<string[]>([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  function isLetter(char: string): boolean {
+    return /^[a-zA-Z]$/.test(char);
+  }
+
+  function isDigit(char: string): boolean {
+    return /^\d$/.test(char);
+  }
+
+  function isValidIdentifier(identifier: string): boolean {
+    if (identifier.length === 1) {
+      return true;
+    }
+
+    return false;
+  }
+
+  function isServiceWords(identifier: string) {
+    if (serviceWords.find((item) => item.value === identifier)) {
+      return true;
+    }
+    return false;
+  }
+
+  function isIdentifier(identifier: string) {
+    if (isLetter(identifier[0])) {
+      for (const char of identifier) {
+        if (isLetter(char) && isDigit(char)) {
+          return true;
+        }
+      }
+    }
+    if (isValidIdentifier(identifier)) {
+      return identifier;
+    }
+
+    return false;
+  }
+
+  // Функция для фильтрации символов
+  function filterCharacters(chars: string[]) {
+    const identifiers = [];
+    const delimiters = [];
+    const keywords = [];
+    const numbers = [];
+
+    let currentIdentifier = "";
+    for (let i = 0; i < chars.length; i++) {
+      const char = chars[i];
+
+      if (isLetter(char) || isDigit(char)) {
+        currentIdentifier += char;
+      } else {
+        const resultServiceWords = isServiceWords(currentIdentifier);
+        const resultValidIdentifier = isValidIdentifier(currentIdentifier);
+
+        if (resultServiceWords) {
+          keywords.push(currentIdentifier);
+          currentIdentifier = "";
+        } else if (resultValidIdentifier) {
+          currentIdentifier = "";
+
+          return;
+        } else if (isLetter(currentIdentifier[0])) {
+          identifiers.push(currentIdentifier);
+          currentIdentifier = "";
+        } else {
+          // identifiers.push(currentIdentifier);
+          currentIdentifier = "";
+        }
+      }
+    }
+
+    return {
+      identifiers,
+      delimiters,
+      keywords,
+      numbers,
+    };
+  }
+
+  // function filterCharacters(chars, criteria) {
+  //   const { identifiers, numbers, delimiters, keywords } = criteria;
+
+  //   // Фильтрация по идентификаторам
+  //   const validIdentifier = (char) => /^[a-zA-Z][a-zA-Z0-9]*$/.test(char);
+
+  //   // Фильтрация по числам&lt;br&gt;
+  //   const validNumber = (char) => /^[0-9]$/.test(char);
+
+  //   // Фильтрация по ограничителям
+  //   const validDelimiter = (char) => delimiters.includes(char);
+
+  //   // Фильтрация по ключевым словам
+  //   const validKeyword = (char) => keywords.includes(char);
+
+  //   return chars.filter((char) => {
+  //     return (
+  //       (identifiers && validIdentifier(char)) ||
+  //       (numbers && validNumber(char)) ||
+  //       (delimiters && validDelimiter(char)) ||
+  //       (keywords && validKeyword(char))
+  //     );
+  //   });
+  // }
+
+  const analysis = (value: string[]) => {
+    const result = filterCharacters(value);
+    console.log("result: ", result);
+    // const filtered = filterCharacters(value, criteria);
+    // console.log("filtered: ", filtered);
+    let index = 0;
+    const lettersAndNumbers = [...letters, ...figures];
+    // const startsWithValidLetter = letters.some((letter) =>
+    //   word.startsWith(letter)
+    // );
+
+    // const chars = word.value.split("");
+
+    // const allValidChars = [...chars].every((char) =>
+    //   lettersAndNumbers.includes(char)
+    // );
+    // const serviceWord = isServiceWord(word);
+
+    //   return startsWithValidLetter && allValidChars;
+    value.forEach((char) => {
+      const isLetter = letters.includes(char);
+      if (isLetter) {
+        const newIdentifier: Value = {
+          id: index++,
+          value: char,
+        };
+      }
+    });
+  };
+
+  // const handleCode = (value: Value[]) => {
+  //   const filteredWords = value.filter(isValidWord);
+  //   const filteredNumbers = value.filter(isValidNumber);
+  //   const filteredServiceWord = value
+  //     .map(isServiceWord)
+  //     .filter((item) => item !== undefined);
+  //   const filteredSeparator = value
+  //     .map(isSeparator)
+  //     .filter((item) => item !== undefined);
+
+  //   setIdentifiers(filteredWords);
+  //   setNumbers(filteredNumbers);
+
+  //   const formattedWords = formattingValues(filteredWords, 3);
+  //   const formattedNumbers = formattingValues(filteredNumbers, 4);
+  //   const formattedServiceWord = formattingValues(filteredServiceWord, 1, true);
+  //   const formattedSeparator = formattingValues(
+  //     filteredSeparator as ConstantValue[],
+  //     2,
+  //     true
+  //   );
+
+  //   const sortedValues = [
+  //     ...formattedWords,
+  //     ...formattedNumbers,
+  //     ...formattedServiceWord,
+  //     ...formattedSeparator,
+  //   ].sort((a, b) => a.id - b.id);
+
+  //   setResult(sortedValues);
+  // };
+
+  const onChangeCode = (values: string) => {
+    const value = values.split("");
+
+    // const value = values.split(" ");
+
+    // console.log("isSeparators: ", isSeparators);
+    // const formattedValues = value.flatMap((item, index) => {
+    //   let word = [
+    //     {
+    //       id: index,
+    //       value: item,
+    //     },
+    //   ];
+    //   console.log("word: ", word);
+
+    //   const chars = item.split("").filter(isSeparator);
+
+    //   if (chars.length > 0) {
+    //     word = [...chars].map((char, j) => {
+    //       return {
+    //         id: index + j,
+    //         value: char,
+    //       };
+    //     });
+    //   }
+    //   console.log("word: ", word);
+
+    //   return word;
+    // });
+
+    setCode(value);
+  };
+
+  return (
+    <div>
+      <Container>
+        <div className="flex gap-2">
+          <TableValues
+            title="Cлужебные слова"
+            values={serviceWords}
+            indexTable={1}
+          />
+          <TableValues
+            title="Ограничители"
+            values={separators}
+            indexTable={2}
+          />
+          <TableValues
+            title="Идентификаторы"
+            values={identifiers}
+            indexTable={3}
+          />
+          <TableValues title="Числа" values={numbers} indexTable={4} />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <div className="w-1/2">
+          <Button onClick={() => analysis(code)}>Начать</Button>
+        </div>
+        <div className="flex gap-4 w-full">
+          <TextareaCode onChangeCode={onChangeCode} />
+          <TextareaResult result={result} />
+        </div>
+      </Container>
     </div>
   );
 }
