@@ -3,22 +3,26 @@
 import { Button } from "@/components/ui";
 import { Container, TableValues, TextareaCode } from "@/components/shared";
 import { TextareaResult } from "@/components/shared/textarea-result";
-import { figures, letters, separators, serviceWords } from "@/lib/constants";
+import { separators, serviceWords } from "@/lib/constants";
 import { useState } from "react";
-import {
-  formattingValues,
-  isSeparator,
-  isServiceWord,
-  isValidNumber,
-  isValidWord,
-} from "@/lib";
+
 import { ResultValue, Value } from "@/@types/value";
+
+interface analysisResult {
+  identifiers: Value[];
+  delimiters: Value[];
+  keywords: Value[];
+  numbers: Value[];
+  allElements: Value[];
+  errorMessage: string;
+}
 
 export default function Home() {
   const [identifiers, setIdentifiers] = useState<Value[]>([]);
   const [numbers, setNumbers] = useState<Value[]>([]);
   const [result, setResult] = useState<ResultValue[]>([]);
   const [code, setCode] = useState<string[]>([]);
+  const [errorMesage, setErrorMesage] = useState<string>("");
 
   function isLetter(char: string): boolean {
     return /^[a-zA-Z]$/.test(char);
@@ -30,10 +34,10 @@ export default function Home() {
 
   function isValidIdentifier(identifier: string): boolean {
     if (identifier.length === 1) {
-      return true;
+      return false;
     }
 
-    return false;
+    return true;
   }
 
   function isServiceWords(identifier: string) {
@@ -42,180 +46,233 @@ export default function Home() {
     }
     return false;
   }
-
-  function isIdentifier(identifier: string) {
-    if (isLetter(identifier[0])) {
-      for (const char of identifier) {
-        if (isLetter(char) && isDigit(char)) {
-          return true;
-        }
-      }
+  function isDelimiters(identifier: string) {
+    if (separators.find((item) => item.value === identifier)) {
+      return true;
     }
-    if (isValidIdentifier(identifier)) {
-      return identifier;
-    }
-
     return false;
   }
 
+  // function isIdentifier(identifier: string) {
+  //   if (isLetter(identifier[0])) {
+  //     for (const char of identifier) {
+  //       if (isLetter(char) && isDigit(char)) {
+  //         return true;
+  //       }
+  //     }
+  //   }
+  //   if (isValidIdentifier(identifier)) {
+  //     return identifier;
+  //   }
+
+  //   return false;
+  // }
+
   // Функция для фильтрации символов
   function filterCharacters(chars: string[]) {
-    const identifiers = [];
-    const delimiters = [];
-    const keywords = [];
-    const numbers = [];
+    const identifiers: Value[] = [];
+    const delimiters: Value[] = [];
+    const keywords: Value[] = [];
+    const numbers: Value[] = [];
+    const allElements: Value[] = [];
+    let errorMessage = "";
+    const variantsErrorMessage = {
+      noIdentifier: "Обнаружено недопустимое имя идентификатора!",
+      noIdentifierLength:
+        "Неккоректная запись идентификатора, Идентификатор должен содержать более одного символа!",
+      noExitProgram:
+        "Неккоректный выход из программы, после end ожидалась '.' ",
+    };
 
     let currentIdentifier = "";
+    let isExit = false;
+    let isError = false;
+    let flagEnd = false;
+    let id = 0;
+    let insideBlock = false;
+    let openBraceCount = 0;
     for (let i = 0; i < chars.length; i++) {
+      let isBlocked = isError || isExit ? true : false;
+
       const char = chars[i];
+      if (!flagEnd && !isBlocked && !insideBlock && char === "{") {
+        delimiters.push({ value: "{", id });
 
-      if (isLetter(char) || isDigit(char)) {
+        insideBlock = true; // Входим в блок
+        openBraceCount++;
+        id++;
+        currentIdentifier = "";
+      } else if (insideBlock && char === "}") {
+        if (insideBlock) {
+          openBraceCount--;
+          insideBlock = false;
+        }
+        delimiters.push({ value: "}", id });
+        id++;
+        currentIdentifier = "";
+
+        // if (openBraceCount === 0) {
+        //   throw new Error(
+        //     "Обнаружена закрывающая фигурная скобка без соответствующей открывающей!"
+        //   );
+        // }
+      } else if (insideBlock) {
         currentIdentifier += char;
-      } else {
-        const resultServiceWords = isServiceWords(currentIdentifier);
-        const resultValidIdentifier = isValidIdentifier(currentIdentifier);
-
-        if (resultServiceWords) {
-          keywords.push(currentIdentifier);
-          currentIdentifier = "";
-        } else if (resultValidIdentifier) {
-          currentIdentifier = "";
-
-          return;
-        } else if (isLetter(currentIdentifier[0])) {
-          identifiers.push(currentIdentifier);
-          currentIdentifier = "";
+        if (currentIdentifier.includes("end.")) {
+          errorMessage = "Обнаружено слово 'end.' внутри фигурных скобок!";
+          isExit = true;
+        }
+        // throw new Error("Обнаружено слово 'end' внутри фигурных скобок!");
+      } else if (!isBlocked && !insideBlock) {
+        // Игнорируем если внутри блока
+        if (isLetter(char) || isDigit(char)) {
+          currentIdentifier += char;
         } else {
-          // identifiers.push(currentIdentifier);
-          currentIdentifier = "";
+          const resultServiceWords = isServiceWords(currentIdentifier);
+          const resultValidIdentifier = isValidIdentifier(currentIdentifier);
+
+          if (resultServiceWords) {
+            if (!flagEnd) {
+              keywords.push({ value: currentIdentifier, id });
+              id++;
+              if (currentIdentifier === "end") {
+                console.log(currentIdentifier);
+                flagEnd = true;
+              }
+              currentIdentifier = "";
+            } else {
+              errorMessage = variantsErrorMessage.noExitProgram;
+              isError = true;
+            }
+
+            console.log(1);
+          } else if (isLetter(currentIdentifier[0]) && !resultValidIdentifier) {
+            currentIdentifier = "";
+            errorMessage = variantsErrorMessage.noIdentifierLength;
+
+            console.log(2);
+            isError = true;
+          } else if (isLetter(currentIdentifier[0])) {
+            if (!flagEnd) {
+              identifiers.push({ value: currentIdentifier, id });
+              id++;
+              currentIdentifier = "";
+            } else {
+              errorMessage = variantsErrorMessage.noExitProgram;
+              isError = true;
+            }
+            console.log(3);
+
+            // написать функцию которая проверяет currentIdentifier на число
+          } else if (isDigit(currentIdentifier[0])) {
+            if (!flagEnd) {
+              numbers.push({ value: currentIdentifier, id });
+              id++;
+              currentIdentifier = "";
+            } else {
+              errorMessage = variantsErrorMessage.noExitProgram;
+              isError = true;
+            }
+            console.log(4);
+          }
+          // } else {
+          //   // identifiers.push(currentIdentifier);
+          //   currentIdentifier = "";
+          // }
+
+          if (isDelimiters(char)) {
+            if (flagEnd) {
+              if (char === ".") {
+                console.log("Выход");
+                delimiters.push({ value: char, id });
+                id++;
+                isExit = true;
+              } else {
+                errorMessage = variantsErrorMessage.noExitProgram;
+
+                isError = true;
+              }
+            } else {
+              delimiters.push({ value: char, id });
+              id++;
+            }
+          }
         }
       }
     }
+
+    if (openBraceCount > 0) {
+      errorMessage =
+        "Обнаружены открытые фигурные скобки без соответствующих закрывающих!";
+
+      isError = true;
+      // throw new Error(
+      //   "Обнаружены открытые фигурные скобки без соответствующих закрывающих!"
+      // );
+    }
+
+    allElements.push(...identifiers, ...delimiters, ...keywords, ...numbers);
+    allElements.sort((a, b) => a.id - b.id);
 
     return {
       identifiers,
       delimiters,
       keywords,
       numbers,
+      allElements,
+      errorMessage,
     };
   }
 
-  // function filterCharacters(chars, criteria) {
-  //   const { identifiers, numbers, delimiters, keywords } = criteria;
+  function createIdMapping(
+    obj: analysisResult
+  ): { idTable: number; idToTable: number }[] {
+    const result: { idTable: number; idToTable: number }[] = [];
 
-  //   // Фильтрация по идентификаторам
-  //   const validIdentifier = (char) => /^[a-zA-Z][a-zA-Z0-9]*$/.test(char);
+    // Проходим по allElements и создаем нужный массив
+    for (const element of obj.allElements) {
+      if (obj.keywords.some((item) => item.id === element.id)) {
+        result.push({
+          idTable: 1,
+          idToTable: serviceWords.findIndex((a) => a.value === element.value),
+        });
+      } else if (obj.delimiters.some((item) => item.id === element.id)) {
+        result.push({
+          idTable: 2,
+          idToTable: separators.findIndex((a) => a.value === element.value),
+        });
+      } else if (obj.identifiers.some((item) => item.id === element.id)) {
+        result.push({
+          idTable: 3,
+          idToTable: obj.identifiers.findIndex((a) => a.id === element.id),
+        });
+      } else if (obj.numbers.some((item) => item.id === element.id)) {
+        result.push({
+          idTable: 4,
+          idToTable: obj.numbers.findIndex((a) => a.id === element.id),
+        });
+      }
+    }
 
-  //   // Фильтрация по числам&lt;br&gt;
-  //   const validNumber = (char) => /^[0-9]$/.test(char);
-
-  //   // Фильтрация по ограничителям
-  //   const validDelimiter = (char) => delimiters.includes(char);
-
-  //   // Фильтрация по ключевым словам
-  //   const validKeyword = (char) => keywords.includes(char);
-
-  //   return chars.filter((char) => {
-  //     return (
-  //       (identifiers && validIdentifier(char)) ||
-  //       (numbers && validNumber(char)) ||
-  //       (delimiters && validDelimiter(char)) ||
-  //       (keywords && validKeyword(char))
-  //     );
-  //   });
-  // }
+    return result;
+  }
 
   const analysis = (value: string[]) => {
-    const result = filterCharacters(value);
-    console.log("result: ", result);
-    // const filtered = filterCharacters(value, criteria);
-    // console.log("filtered: ", filtered);
-    let index = 0;
-    const lettersAndNumbers = [...letters, ...figures];
-    // const startsWithValidLetter = letters.some((letter) =>
-    //   word.startsWith(letter)
-    // );
+    const filteredCharacters = filterCharacters(value);
+    console.log("filteredCharacters: ", filteredCharacters);
 
-    // const chars = word.value.split("");
+    if (filteredCharacters) {
+      setIdentifiers([...filteredCharacters?.identifiers]);
+      setNumbers([...filteredCharacters?.numbers]);
+      const sortedCharacters = createIdMapping(filteredCharacters);
 
-    // const allValidChars = [...chars].every((char) =>
-    //   lettersAndNumbers.includes(char)
-    // );
-    // const serviceWord = isServiceWord(word);
-
-    //   return startsWithValidLetter && allValidChars;
-    value.forEach((char) => {
-      const isLetter = letters.includes(char);
-      if (isLetter) {
-        const newIdentifier: Value = {
-          id: index++,
-          value: char,
-        };
-      }
-    });
+      setResult([...sortedCharacters] as ResultValue[]);
+      setErrorMesage(filteredCharacters.errorMessage);
+    }
   };
-
-  // const handleCode = (value: Value[]) => {
-  //   const filteredWords = value.filter(isValidWord);
-  //   const filteredNumbers = value.filter(isValidNumber);
-  //   const filteredServiceWord = value
-  //     .map(isServiceWord)
-  //     .filter((item) => item !== undefined);
-  //   const filteredSeparator = value
-  //     .map(isSeparator)
-  //     .filter((item) => item !== undefined);
-
-  //   setIdentifiers(filteredWords);
-  //   setNumbers(filteredNumbers);
-
-  //   const formattedWords = formattingValues(filteredWords, 3);
-  //   const formattedNumbers = formattingValues(filteredNumbers, 4);
-  //   const formattedServiceWord = formattingValues(filteredServiceWord, 1, true);
-  //   const formattedSeparator = formattingValues(
-  //     filteredSeparator as ConstantValue[],
-  //     2,
-  //     true
-  //   );
-
-  //   const sortedValues = [
-  //     ...formattedWords,
-  //     ...formattedNumbers,
-  //     ...formattedServiceWord,
-  //     ...formattedSeparator,
-  //   ].sort((a, b) => a.id - b.id);
-
-  //   setResult(sortedValues);
-  // };
 
   const onChangeCode = (values: string) => {
     const value = values.split("");
-
-    // const value = values.split(" ");
-
-    // console.log("isSeparators: ", isSeparators);
-    // const formattedValues = value.flatMap((item, index) => {
-    //   let word = [
-    //     {
-    //       id: index,
-    //       value: item,
-    //     },
-    //   ];
-    //   console.log("word: ", word);
-
-    //   const chars = item.split("").filter(isSeparator);
-
-    //   if (chars.length > 0) {
-    //     word = [...chars].map((char, j) => {
-    //       return {
-    //         id: index + j,
-    //         value: char,
-    //       };
-    //     });
-    //   }
-    //   console.log("word: ", word);
-
-    //   return word;
-    // });
 
     setCode(value);
   };
@@ -246,7 +303,7 @@ export default function Home() {
         </div>
         <div className="flex gap-4 w-full">
           <TextareaCode onChangeCode={onChangeCode} />
-          <TextareaResult result={result} />
+          <TextareaResult result={result} errorMessage={errorMesage} />
         </div>
       </Container>
     </div>

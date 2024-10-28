@@ -3,9 +3,10 @@ import { Label, Textarea } from "../ui";
 
 interface Props {
   result: ResultValue[];
+  errorMessage?: string;
 }
 
-export const TextareaResult: React.FC<Props> = ({ result }) => {
+export const TextareaResult: React.FC<Props> = ({ result, errorMessage }) => {
   return (
     <div className="w-full">
       <Label htmlFor="message" className="">
@@ -13,7 +14,11 @@ export const TextareaResult: React.FC<Props> = ({ result }) => {
       </Label>
       <Textarea
         className="min-h-48"
-        value={result.map((el) => `(${el.idTable}, ${el.idToTable})`)}
+        value={
+          errorMessage && errorMessage.length > 1
+            ? errorMessage
+            : result.map((el) => `(${el.idTable}, ${el.idToTable + 1})`)
+        }
       />
     </div>
   );
