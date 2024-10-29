@@ -27,7 +27,11 @@ export const TableValues: React.FC<Props> = ({
           <div key={index}>
             <div className="text-sm">
               <span>{index + 1} </span>
-              {typeof item === "object" ? item.value : item}
+              {typeof item === "object"
+                ? item.value === "\n"
+                  ? "\\n"
+                  : item.value
+                : item}
             </div>
             {index !== values.length - 1 && <Separator className="my-2" />}
           </div>

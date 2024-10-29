@@ -41,7 +41,13 @@ export default function Home() {
   }
 
   function isServiceWords(identifier: string) {
-    if (serviceWords.find((item) => item.value === identifier)) {
+    if (
+      serviceWords.find((item) => {
+        return (
+          item.value.toLocaleLowerCase() === identifier.toLocaleLowerCase()
+        );
+      })
+    ) {
       return true;
     }
     return false;
@@ -70,6 +76,7 @@ export default function Home() {
 
   // Функция для фильтрации символов
   function filterCharacters(chars: string[]) {
+    console.log("chars: ", chars);
     const identifiers: Value[] = [];
     const delimiters: Value[] = [];
     const keywords: Value[] = [];
@@ -82,6 +89,9 @@ export default function Home() {
         "Неккоректная запись идентификатора, Идентификатор должен содержать более одного символа!",
       noExitProgram:
         "Неккоректный выход из программы, после end ожидалась '.' ",
+      noPoint:
+        "Некорректный разделитель. Найдена одиночная точка '.' без соответствующего значения перед ней.",
+      noChar: "Обнаружено недопустимое значение - ",
     };
 
     let currentIdentifier = "";
@@ -95,107 +105,89 @@ export default function Home() {
       let isBlocked = isError || isExit ? true : false;
 
       const char = chars[i];
-      if (!flagEnd && !isBlocked && !insideBlock && char === "{") {
-        // delimiters.push({ value: "{", id });
 
+      if (!isBlocked && !insideBlock && char === "{") {
         insideBlock = true; // Входим в блок
         openBraceCount++;
-        // id++;
         currentIdentifier = "";
       } else if (insideBlock && char === "}") {
         if (insideBlock) {
           openBraceCount--;
           insideBlock = false;
         }
-        // delimiters.push({ value: "}", id });
-        // id++;
         currentIdentifier = "";
-
-        // if (openBraceCount === 0) {
-        //   throw new Error(
-        //     "Обнаружена закрывающая фигурная скобка без соответствующей открывающей!"
-        //   );
-        // }
       } else if (insideBlock) {
         currentIdentifier += char;
         if (currentIdentifier.includes("end.")) {
           errorMessage = "Обнаружено слово 'end.' внутри фигурных скобок!";
           isExit = true;
         }
-        // throw new Error("Обнаружено слово 'end' внутри фигурных скобок!");
       } else if (!isBlocked && !insideBlock) {
+        if (
+          !isLetter(char) &&
+          !isDigit(char) &&
+          !isDelimiters(char) &&
+          char !== " " &&
+          char !== "."
+        ) {
+          errorMessage = variantsErrorMessage.noChar + `"${char}"`;
+          isError = true;
+        }
         // Игнорируем если внутри блока
-        if (isLetter(char) || isDigit(char)) {
+        if (isLetter(char) || isDigit(char) || char === ".") {
           currentIdentifier += char;
+          console.log("currentIdentifier: ", currentIdentifier);
         } else {
           const resultServiceWords = isServiceWords(currentIdentifier);
           const resultValidIdentifier = isValidIdentifier(currentIdentifier);
 
           if (resultServiceWords) {
-            if (!flagEnd) {
-              keywords.push({ value: currentIdentifier, id });
-              id++;
-              if (currentIdentifier === "end") {
-                console.log(currentIdentifier);
-                flagEnd = true;
-              }
-              currentIdentifier = "";
-            } else {
-              errorMessage = variantsErrorMessage.noExitProgram;
-              isError = true;
+            if (currentIdentifier === "end.") {
+              isExit = true;
             }
-
+            keywords.push({ value: currentIdentifier, id });
+            id++;
+            currentIdentifier = "";
             console.log(1);
           } else if (isLetter(currentIdentifier[0]) && !resultValidIdentifier) {
             currentIdentifier = "";
             errorMessage = variantsErrorMessage.noIdentifierLength;
-
             console.log(2);
             isError = true;
           } else if (isLetter(currentIdentifier[0])) {
-            if (!flagEnd) {
-              identifiers.push({ value: currentIdentifier, id });
-              id++;
-              currentIdentifier = "";
-            } else {
-              errorMessage = variantsErrorMessage.noExitProgram;
-              isError = true;
+            if (currentIdentifier === "end") {
+              console.log(currentIdentifier);
+              flagEnd = true;
             }
+            identifiers.push({ value: currentIdentifier, id });
+            id++;
+            currentIdentifier = "";
             console.log(3);
-
             // написать функцию которая проверяет currentIdentifier на число
           } else if (isDigit(currentIdentifier[0])) {
-            if (!flagEnd) {
-              numbers.push({ value: currentIdentifier, id });
-              id++;
-              currentIdentifier = "";
-            } else {
-              errorMessage = variantsErrorMessage.noExitProgram;
-              isError = true;
-            }
+            numbers.push({ value: currentIdentifier, id });
+            id++;
+            currentIdentifier = "";
             console.log(4);
           }
-          // } else {
-          //   // identifiers.push(currentIdentifier);
-          //   currentIdentifier = "";
-          // }
-
           if (isDelimiters(char)) {
-            if (flagEnd) {
-              if (char === ".") {
-                console.log("Выход");
-                delimiters.push({ value: char, id });
-                id++;
-                isExit = true;
-              } else {
-                errorMessage = variantsErrorMessage.noExitProgram;
-
-                isError = true;
-              }
-            } else {
-              delimiters.push({ value: char, id });
-              id++;
-            }
+            console.log(5);
+            delimiters.push({ value: char, id });
+            id++;
+          }
+          if (currentIdentifier === ".") {
+            errorMessage = variantsErrorMessage.noPoint;
+            console.log("одиночная .");
+            isError = true;
+            // if (flagEnd) {
+            //   console.log("флаг Выход");
+            //   errorMessage = variantsErrorMessage.noPoint;
+            //   isExit = true;
+            // } else {
+            //   errorMessage = variantsErrorMessage.noPoint;
+            //   console.log("одиночная .");
+            //   isError = true;
+            // }
           }
         }
       }
@@ -204,11 +196,7 @@ export default function Home() {
     if (openBraceCount > 0) {
       errorMessage =
         "Обнаружены открытые фигурные скобки без соответствующих закрывающих!";
-
       isError = true;
-      // throw new Error(
-      //   "Обнаружены открытые фигурные скобки без соответствующих закрывающих!"
-      // );
     }
 
     allElements.push(...identifiers, ...delimiters, ...keywords, ...numbers);
@@ -229,12 +217,14 @@ export default function Home() {
   ): { idTable: number; idToTable: number }[] {
     const result: { idTable: number; idToTable: number }[] = [];
 
-    // Проходим по allElements и создаем нужный массив
     for (const element of obj.allElements) {
       if (obj.keywords.some((item) => item.id === element.id)) {
         result.push({
           idTable: 1,
-          idToTable: serviceWords.findIndex((a) => a.value === element.value),
+          idToTable: serviceWords.findIndex(
+            (a) =>
+              a.value.toLocaleLowerCase() === element.value.toLocaleLowerCase()
+          ),
         });
       } else if (obj.delimiters.some((item) => item.id === element.id)) {
         result.push({
@@ -272,7 +262,12 @@ export default function Home() {
   };
 
   const onChangeCode = (values: string) => {
-    const value = values.split("");
+    let value = values
+      .split("\n")
+      .map((line) => line.trim() + " ")
+      .join("\n")
+      .split("");
+    console.log("value: ", value);
 
     setCode(value);
   };
