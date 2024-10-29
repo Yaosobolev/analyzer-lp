@@ -96,19 +96,19 @@ export default function Home() {
 
       const char = chars[i];
       if (!flagEnd && !isBlocked && !insideBlock && char === "{") {
-        delimiters.push({ value: "{", id });
+        // delimiters.push({ value: "{", id });
 
         insideBlock = true; // Входим в блок
         openBraceCount++;
-        id++;
+        // id++;
         currentIdentifier = "";
       } else if (insideBlock && char === "}") {
         if (insideBlock) {
           openBraceCount--;
           insideBlock = false;
         }
-        delimiters.push({ value: "}", id });
-        id++;
+        // delimiters.push({ value: "}", id });
+        // id++;
         currentIdentifier = "";
 
         // if (openBraceCount === 0) {
