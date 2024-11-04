@@ -7,6 +7,7 @@ interface Props {
 }
 
 export const TextareaResult: React.FC<Props> = ({ result, errorMessage }) => {
+  // console.log("result: ", result);
   return (
     <div className="w-full">
       <Label htmlFor="message" className="">

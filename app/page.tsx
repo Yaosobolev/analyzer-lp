@@ -119,7 +119,7 @@ export default function Home() {
         currentIdentifier = "";
       } else if (insideBlock) {
         currentIdentifier += char;
-        if (currentIdentifier.includes("end.")) {
+        if (currentIdentifier.toLocaleLowerCase().includes("end.")) {
           errorMessage = "Обнаружено слово 'end.' внутри фигурных скобок!";
           isExit = true;
         }
@@ -157,6 +157,8 @@ export default function Home() {
             id++;
             currentIdentifier = "";
             console.log(1);
+
+            // длина идентификатора ОДИН не должно быть
           } else if (isLetter(currentIdentifier[0]) && !resultValidIdentifier) {
             currentIdentifier = "";
             errorMessage = variantsErrorMessage.noIdentifierLength;
@@ -168,6 +170,18 @@ export default function Home() {
             // flagEnd = true;
             // }
             if (/^[a-zA-Z0-9]+$/.test(currentIdentifier)) {
+              // проверка на уникальность
+              // const index = identifiers.findIndex(
+              //   (item) => item.value === currentIdentifier
+              // );
+              // console.log("index: ", index);
+
+              // if (index !== -1) {
+              //   const item = identifiers[index];
+              //   console.log("item: ", item);
+              //   id = item.id;
+              // }
+              console.log(id);
               identifiers.push({ value: currentIdentifier, id });
               id++;
               currentIdentifier = "";
@@ -218,9 +232,15 @@ export default function Home() {
               id++;
               currentIdentifier = "";
             } else if (
-              /^[0-9]+\.?[0-9]*[eE][+-]?[0-9]+$/.test(currentIdentifier)
+              // /^[0-9]+\.?[0-9]*[eE][+-]?[0-9]+$/
+              /^0*(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)[eE][+-]?[0-9]+$/.test(
+                currentIdentifier
+              )
             ) {
               console.log("E"); // exponential
+              if (currentIdentifier.startsWith(".")) {
+                currentIdentifier = "0" + currentIdentifier;
+              }
               numbers.push({ value: currentIdentifier, id });
               id++;
               currentIdentifier = "";
@@ -285,6 +305,18 @@ export default function Home() {
     obj: analysisResult
   ): { idTable: number; idToTable: number }[] {
     const result: { idTable: number; idToTable: number }[] = [];
+    console.log("obj: ", obj);
+
+    const sortedIdentifiers = obj.identifiers.filter(
+      (item, index, self) =>
+        self.findIndex((t) => t.value === item.value) === index
+    );
+    const sortedNumbers = obj.numbers.filter(
+      (item, index, self) =>
+        self.findIndex((t) => t.value === item.value) === index
+    );
+    console.log("sortedValues: ", sortedIdentifiers);
+    console.log("sortedNumbers: ", sortedNumbers);
 
     for (const element of obj.allElements) {
       if (obj.keywords.some((item) => item.id === element.id)) {
@@ -303,15 +335,18 @@ export default function Home() {
       } else if (obj.identifiers.some((item) => item.id === element.id)) {
         result.push({
           idTable: 3,
-          idToTable: obj.identifiers.findIndex((a) => a.id === element.id),
+          idToTable: sortedIdentifiers.findIndex(
+            (a) => a.value === element.value
+          ),
         });
       } else if (obj.numbers.some((item) => item.id === element.id)) {
         result.push({
           idTable: 4,
-          idToTable: obj.numbers.findIndex((a) => a.id === element.id),
+          idToTable: sortedNumbers.findIndex((a) => a.value === element.value),
         });
       }
     }
+    console.log("result: ", result);
 
     return result;
   }
