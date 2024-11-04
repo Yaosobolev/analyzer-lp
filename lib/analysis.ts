@@ -1,3 +1,3 @@
-export const analysis() => {
-    
-}
+export const analysis = () => {
+  console.log(":sxsxs");
+};

@@ -76,7 +76,6 @@ export default function Home() {
 
   // Функция для фильтрации символов
   function filterCharacters(chars: string[]) {
-    console.log("chars: ", chars);
     const identifiers: Value[] = [];
     const delimiters: Value[] = [];
     const keywords: Value[] = [];
@@ -85,24 +84,26 @@ export default function Home() {
     let errorMessage = "";
     const variantsErrorMessage = {
       noIdentifier: "Обнаружено недопустимое имя идентификатора!",
+      noDigit: "Обнаружено недопустимое число!",
       noIdentifierLength:
         "Неккоректная запись идентификатора, Идентификатор должен содержать более одного символа!",
       noExitProgram:
         "Неккоректный выход из программы, после end ожидалась '.' ",
       noPoint:
         "Некорректный разделитель. Найдена одиночная точка '.' без соответствующего значения перед ней.",
+
       noChar: "Обнаружено недопустимое значение - ",
     };
 
     let currentIdentifier = "";
     let isExit = false;
     let isError = false;
-    let flagEnd = false;
+    // let flagEnd = false;
     let id = 0;
     let insideBlock = false;
     let openBraceCount = 0;
     for (let i = 0; i < chars.length; i++) {
-      let isBlocked = isError || isExit ? true : false;
+      const isBlocked = isError || isExit ? true : false;
 
       const char = chars[i];
 
@@ -128,15 +129,22 @@ export default function Home() {
           !isDigit(char) &&
           !isDelimiters(char) &&
           char !== " " &&
-          char !== "."
+          char !== "." &&
+          char !== "+" &&
+          char !== "-"
         ) {
           errorMessage = variantsErrorMessage.noChar + `"${char}"`;
           isError = true;
         }
         // Игнорируем если внутри блока
-        if (isLetter(char) || isDigit(char) || char === ".") {
+        if (
+          isLetter(char) ||
+          isDigit(char) ||
+          char === "." ||
+          char === "+" ||
+          char === "-"
+        ) {
           currentIdentifier += char;
-          console.log("currentIdentifier: ", currentIdentifier);
         } else {
           const resultServiceWords = isServiceWords(currentIdentifier);
           const resultValidIdentifier = isValidIdentifier(currentIdentifier);
@@ -155,19 +163,76 @@ export default function Home() {
             console.log(2);
             isError = true;
           } else if (isLetter(currentIdentifier[0])) {
-            if (currentIdentifier === "end") {
-              console.log(currentIdentifier);
-              flagEnd = true;
+            // if (currentIdentifier === "end") {
+            // console.log("222222222");
+            // flagEnd = true;
+            // }
+            if (/^[a-zA-Z0-9]+$/.test(currentIdentifier)) {
+              identifiers.push({ value: currentIdentifier, id });
+              id++;
+              currentIdentifier = "";
+
+              console.log(3);
+            } else {
+              errorMessage =
+                variantsErrorMessage.noIdentifier + ` "${currentIdentifier}"`;
+              currentIdentifier = "";
+              isError = true;
             }
-            identifiers.push({ value: currentIdentifier, id });
-            id++;
-            currentIdentifier = "";
-            console.log(3);
             // написать функцию которая проверяет currentIdentifier на число
-          } else if (isDigit(currentIdentifier[0])) {
-            numbers.push({ value: currentIdentifier, id });
-            id++;
-            currentIdentifier = "";
+          } else if (
+            isDigit(currentIdentifier[0]) ||
+            currentIdentifier[0] === "."
+          ) {
+            if (currentIdentifier === ".") {
+              errorMessage =
+                variantsErrorMessage.noChar + `"${currentIdentifier}"`;
+              currentIdentifier = "";
+              isError = true;
+            } else if (/^[01]+[bB]$/.test(currentIdentifier)) {
+              console.log("2b"); // binary +
+              const decimalValue = parseInt(currentIdentifier.slice(0, -1), 2);
+              numbers.push({ value: decimalValue.toString(), id });
+              id++;
+              currentIdentifier = "";
+            } else if (/^[0-7]+[Oo]$/.test(currentIdentifier)) {
+              console.log("8"); // octal +
+              const decimalValue = parseInt(currentIdentifier.slice(0, -1), 8);
+              numbers.push({ value: decimalValue.toString(), id });
+              id++;
+              currentIdentifier = "";
+            } else if (
+              /^(?:[0-9]+(?:\.[0-9]+)?|\.[0-9]+)$/.test(currentIdentifier)
+            ) {
+              if (currentIdentifier.startsWith(".")) {
+                currentIdentifier = "0" + currentIdentifier;
+              }
+              console.log("10"); // decimal +
+              numbers.push({ value: currentIdentifier, id });
+              id++;
+              currentIdentifier = "";
+            } else if (/^[0-9a-fA-F]+[Hh]$/.test(currentIdentifier)) {
+              console.log("16"); // hexadecimal
+              const decimalValue = parseInt(currentIdentifier.slice(0, -1), 16);
+              numbers.push({ value: decimalValue.toString(), id });
+              id++;
+              currentIdentifier = "";
+            } else if (
+              /^[0-9]+\.?[0-9]*[eE][+-]?[0-9]+$/.test(currentIdentifier)
+            ) {
+              console.log("E"); // exponential
+              numbers.push({ value: currentIdentifier, id });
+              id++;
+              currentIdentifier = "";
+            } else {
+              errorMessage =
+                variantsErrorMessage.noDigit + ` "${currentIdentifier}"`;
+              currentIdentifier = "";
+              isError = true;
+            }
+            // numbers.push({ value: currentIdentifier, id });
+            // id++;
+            // currentIdentifier = "";
             console.log(4);
           }
           if (isDelimiters(char)) {
@@ -175,19 +240,23 @@ export default function Home() {
             delimiters.push({ value: char, id });
             id++;
           }
-          if (currentIdentifier === ".") {
-            errorMessage = variantsErrorMessage.noPoint;
-            console.log("одиночная .");
+          if (currentIdentifier.includes(".")) {
+            errorMessage =
+              variantsErrorMessage.noChar + `"${currentIdentifier}1"`;
+            currentIdentifier = "";
             isError = true;
-            // if (flagEnd) {
-            //   console.log("флаг Выход");
-            //   errorMessage = variantsErrorMessage.noPoint;
-            //   isExit = true;
-            // } else {
-            //   errorMessage = variantsErrorMessage.noPoint;
-            //   console.log("одиночная .");
-            //   isError = true;
-            // }
+          }
+          if (currentIdentifier.includes("+")) {
+            errorMessage =
+              variantsErrorMessage.noChar + `"${currentIdentifier}2"`;
+            currentIdentifier = "";
+            isError = true;
+          }
+          if (currentIdentifier.includes("+")) {
+            errorMessage =
+              variantsErrorMessage.noChar + `"${currentIdentifier}3"`;
+            currentIdentifier = "";
+            isError = true;
           }
         }
       }
@@ -249,7 +318,6 @@ export default function Home() {
 
   const analysis = (value: string[]) => {
     const filteredCharacters = filterCharacters(value);
-    console.log("filteredCharacters: ", filteredCharacters);
 
     if (filteredCharacters) {
       setIdentifiers([...filteredCharacters?.identifiers]);
@@ -262,12 +330,11 @@ export default function Home() {
   };
 
   const onChangeCode = (values: string) => {
-    let value = values
+    const value = values
       .split("\n")
       .map((line) => line.trim() + " ")
       .join("\n")
       .split("");
-    console.log("value: ", value);
 
     setCode(value);
   };
