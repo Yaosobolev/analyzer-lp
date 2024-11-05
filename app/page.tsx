@@ -375,34 +375,28 @@ export default function Home() {
   };
 
   return (
-    <div>
-      <Container>
-        <div className="flex gap-2">
-          <TableValues
-            title="Cлужебные слова"
-            values={serviceWords}
-            indexTable={1}
-          />
-          <TableValues
-            title="Ограничители"
-            values={separators}
-            indexTable={2}
-          />
-          <TableValues
-            title="Идентификаторы"
-            values={identifiers}
-            indexTable={3}
-          />
-          <TableValues title="Числа" values={numbers} indexTable={4} />
-        </div>
-        <div className="w-1/2">
-          <Button onClick={() => analysis(code)}>Начать</Button>
-        </div>
-        <div className="flex gap-4 w-full">
-          <TextareaCode onChangeCode={onChangeCode} />
-          <TextareaResult result={result} errorMessage={errorMesage} />
-        </div>
-      </Container>
-    </div>
+    <Container>
+      <div className="flex gap-2  flex-wrap ">
+        <TableValues
+          title="Cлужебные слова"
+          values={serviceWords}
+          indexTable={1}
+        />
+        <TableValues title="Ограничители" values={separators} indexTable={2} />
+        <TableValues
+          title="Идентификаторы"
+          values={identifiers}
+          indexTable={3}
+        />
+        <TableValues title="Числа" values={numbers} indexTable={4} />
+      </div>
+      <div className="w-1/2">
+        <Button onClick={() => analysis(code)}>Начать</Button>
+      </div>
+      <div className="flex gap-4 w-full">
+        <TextareaCode onChangeCode={onChangeCode} />
+        <TextareaResult result={result} errorMessage={errorMesage} />
+      </div>
+    </Container>
   );
 }
