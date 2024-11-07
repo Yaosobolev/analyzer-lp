@@ -159,11 +159,11 @@ export default function Home() {
             console.log(1);
 
             // длина идентификатора ОДИН не должно быть
-          } else if (isLetter(currentIdentifier[0]) && !resultValidIdentifier) {
-            currentIdentifier = "";
-            errorMessage = variantsErrorMessage.noIdentifierLength;
-            console.log(2);
-            isError = true;
+            // } else if (isLetter(currentIdentifier[0]) && !resultValidIdentifier) {
+            //   currentIdentifier = "";
+            //   errorMessage = variantsErrorMessage.noIdentifierLength;
+            //   console.log(2);
+            //   isError = true;
           } else if (isLetter(currentIdentifier[0])) {
             // if (currentIdentifier === "end") {
             // console.log("222222222");
