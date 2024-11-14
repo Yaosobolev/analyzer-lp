@@ -1,4 +1,19 @@
-export const serviceWords = [
+export const variantsErrorMessage = {
+  noIdentifier: "Обнаружено недопустимое имя идентификатора!",
+  noDigit: "Обнаружено недопустимое число!",
+  noIdentifierLength:
+    "Неккоректная запись идентификатора, Идентификатор должен содержать более одного символа!",
+  noExitProgram: "Неккоректный выход из программы, после end ожидалась '.' ",
+  noPoint:
+    "Некорректный разделитель. Найдена одиночная точка '.' без соответствующего значения перед ней.",
+
+  noChar: "Обнаружено недопустимое значение - ",
+  noValueInsideBraces: "Обнаружено слово 'end.' внутри фигурных скобок!",
+  noClosedBrace:
+    "Обнаружены открытые фигурные скобки без соответствующих закрывающих!",
+};
+
+export const keywords = [
   { idToTable: 1, value: "program" },
   { idToTable: 2, value: "var" },
   { idToTable: 3, value: "begin" },

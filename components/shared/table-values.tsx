@@ -5,12 +5,12 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   values: Value[] | { idToTable: number; value: string }[];
-  // values: Value[] | string[] | { idToTable: number; value: string }[];
   title: string;
   indexTable: number;
 
   className?: string;
 }
+// для этого сделать тип { idToTable: number; value: string }[]
 
 export const TableValues: React.FC<Props> = ({
   values,
