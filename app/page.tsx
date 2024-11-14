@@ -43,7 +43,7 @@ export default function Home() {
 
   return (
     <Container>
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <TableValues title="Cлужебные слова" values={keywords} indexTable={1} />
         <TableValues title="Ограничители" values={separators} indexTable={2} />
         <TableValues
