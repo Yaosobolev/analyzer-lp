@@ -45,19 +45,6 @@ export const keywords = [
   { idToTable: 29, value: "to" },
   { idToTable: 30, value: "true" },
   { idToTable: 31, value: "false" },
-  // { idToTable: 32, value: "AS" },
-  // { idToTable: 33, value: "PLUS" },
-  // { idToTable: 34, value: "MIN" },
-  // { idToTable: 35, value: "MULT" },
-  // { idToTable: 36, value: "DIV" },
-  // { idToTable: 37, value: "OR" },
-  // { idToTable: 38, value: "AND" },
-  // { idToTable: 39, value: "NE" },
-  // { idToTable: 40, value: "EQ" },
-  // { idToTable: 41, value: "LT" },
-  // { idToTable: 42, value: "LE" },
-  // { idToTable: 43, value: "GT" },
-  // { idToTable: 44, value: "GE" },
 ];
 
 export const separators = [
@@ -72,6 +59,7 @@ export const separators = [
   { idToTable: 8, value: "\n" },
   { idToTable: 9, value: "}" },
   { idToTable: 10, value: "{" },
+  { idToTable: 11, value: "~" },
 ];
 
 export const letters = [

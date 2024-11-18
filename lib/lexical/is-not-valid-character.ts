@@ -5,6 +5,6 @@ export const isNotValidCharacter = (char: string) => {
     !isLetter(char) &&
     !isDigit(char) &&
     !isDelimiters(char) &&
-    ![" ", ".", "+", "-"].includes(char)
+    ![" ", ".", "+", "-", "~"].includes(char)
   );
 };
