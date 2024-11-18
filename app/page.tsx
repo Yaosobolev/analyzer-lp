@@ -6,8 +6,8 @@ import { TextareaResult } from "@/components/shared/textarea-result";
 import { separators, keywords } from "@/lib/constants";
 import { useState } from "react";
 
-import { ResultValue, Value } from "@/@types/value";
-import { createIdMapping, filterCharacters } from "@/lib";
+import { ResultValue, Value, ValueMapping } from "@/@types/value";
+import { createIdMapping, filterCharacters, program } from "@/lib";
 import { useCodeFormatter } from "@/hooks";
 
 export interface analysisResult {
@@ -20,7 +20,6 @@ export interface analysisResult {
 }
 
 export default function Home() {
-  // Сделать хук
   const [identifiers, setIdentifiers] = useState<Value[]>([]);
   const [numbers, setNumbers] = useState<Value[]>([]);
   const [result, setResult] = useState<ResultValue[]>([]);
@@ -28,6 +27,7 @@ export default function Home() {
 
   const { code, onChangeCode } = useCodeFormatter();
 
+  // Сделать хук
   const analysis = (value: string[]) => {
     const filteredCharacters = filterCharacters(value);
 
@@ -38,6 +38,30 @@ export default function Home() {
 
       setResult([...sortedCharacters] as ResultValue[]);
       setErrorMesage(filteredCharacters.errorMessage);
+
+      // Вызов синтаксического анализатора
+      if (filteredCharacters.errorMessage === "") {
+        const syntaxResult = parseSyntax(
+          filteredCharacters.allElements,
+          sortedCharacters
+        );
+        if (syntaxResult?.success) {
+        } else {
+          setErrorMesage(String(syntaxResult?.errorMessage));
+        }
+      }
+    }
+  };
+
+  const parseSyntax = (tokens: Value[], tokensMapping: ValueMapping[]) => {
+    try {
+      const position = 0;
+      const result = program(tokens, position, tokensMapping);
+      return { success: true, position: result.position, errorMessage: "" };
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return { success: false, errorMessage: error.message };
+      }
     }
   };
 
