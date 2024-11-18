@@ -3,6 +3,11 @@ export interface Value {
   value: string;
 }
 
+export interface ValueMapping {
+  idTable: number;
+  idToTable: number;
+}
+
 export interface ResultValue extends Value {
   idTable: number;
   idToTable: number;
