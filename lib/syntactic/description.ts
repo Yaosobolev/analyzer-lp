@@ -1,7 +1,7 @@
 import { Value, ValueMapping } from "@/@types/value";
 import { consume } from "./consume";
 import { listIdentifiers } from "./list-identifiers";
-import { consumeType } from "./consume-type";
+import { consumeArray } from "./consume-array";
 
 export const description = (
   tokens: Value[],
@@ -12,7 +12,7 @@ export const description = (
     while (tokens[position].value.toLocaleLowerCase() !== "begin") {
       position = listIdentifiers(tokens, tokensMapping, position);
       position = consume(tokens, position, ":");
-      position = consumeType(tokens, position, ["int", "float", "bool"]);
+      position = consumeArray(tokens, position, ["int", "float", "bool"]);
       position = consume(tokens, position, ";");
     }
   }
