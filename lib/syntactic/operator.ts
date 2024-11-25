@@ -2,6 +2,11 @@ import { Value, ValueMapping } from "@/@types/value";
 import { match } from "./match";
 import { assignments } from "./assignments";
 import { conditional } from "./conditional";
+import { conditionalLoop } from "./conditional-loop";
+import { fixedlLoop } from "./fixed-loop";
+import { input } from "./input";
+import { output } from "./output";
+import { composite } from "./composite";
 
 export const operator = (
   tokens: Value[],
@@ -10,30 +15,23 @@ export const operator = (
 ): number => {
   // Последовательно проверяем каждый вариант EOper
   if (match(tokens, position, "[")) {
-    // return sost(tokens, tokensMapping, position);
-    console.log("sost");
+    return composite(tokens, position, tokensMapping);
   } else if (
     match(tokens, position, String(tokensMapping[position].idTable), "3")
   ) {
     return assignments(tokens, position, tokensMapping);
   } else if (match(tokens, position, "if")) {
     return conditional(tokens, position, tokensMapping);
+  } else if (match(tokens, position, "for")) {
+    return fixedlLoop(tokens, position, tokensMapping);
+  } else if (match(tokens, position, "while")) {
+    return conditionalLoop(tokens, position, tokensMapping);
+  } else if (match(tokens, position, "read")) {
+    return input(tokens, position, tokensMapping);
+  } else if (match(tokens, position, "write")) {
+    return output(tokens, position, tokensMapping);
   }
 
-  // return pris(tokens, tokensMapping, position);
-  //   } else if (match(tokens, position, "usl")) {
-  //     return usl(tokens, tokensMapping, position);
-  //   } else if (match(tokens, position, "fixc")) {
-  //     return fixC(tokens, tokensMapping, position);
-  //   } else if (match(tokens, position, "uslc")) {
-  //     return uslC(tokens, tokensMapping, position);
-  //   } else if (match(tokens, position, "rd")) {
-  //     return rd(tokens, tokensMapping, position);
-  //   } else if (match(tokens, position, "wr")) {
-  //     return wr(tokens, tokensMapping, position);
-  //   }
-
-  // Если ни один вариант не подошел
   throw new Error(
     `Неожиданный токен в позиции ${position}: ${tokens[position].value}`
   );
