@@ -9,6 +9,6 @@ export const consume = (
   if (match(tokens, position, value)) {
     return position + 1;
   } else {
-    throw new Error(`Ожидалось "${value}" ${tokens[position].value}`);
+    throw new Error(`Ожидалось "${value}"`);
   }
 };

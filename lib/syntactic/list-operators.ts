@@ -8,6 +8,9 @@ export const listOperators = (
   position: number,
   tokensMapping: ValueMapping[]
 ) => {
+  if (!tokens.find((item) => item.value.toLocaleLowerCase() === "end.")) {
+    return position;
+  }
   while (tokens[position].value !== "end.") {
     position = operator(tokens, position, tokensMapping);
 

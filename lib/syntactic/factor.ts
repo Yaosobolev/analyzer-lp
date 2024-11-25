@@ -1,5 +1,4 @@
 import { Value, ValueMapping } from "@/@types/value";
-import { consumeArray } from "./consume-array";
 import { match } from "./match";
 import { consume } from "./consume";
 
@@ -85,7 +84,6 @@ export const factor = (
   }
 
   if (tokens[position].value === "true" || tokens[position].value === "false") {
-    // return consumeArray(tokens, position, ["true", "false"]);
     return position;
   }
 
