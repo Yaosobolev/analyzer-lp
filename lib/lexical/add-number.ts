@@ -35,7 +35,8 @@ export const addNumber = (state: StateLexixal) => {
     if (state.currentIdentifier.startsWith(".")) {
       state.currentIdentifier = "0" + state.currentIdentifier;
     }
-    state.numbers.push({ value: state.currentIdentifier, id: state.id });
+    const decimalValue = parseFloat(state.currentIdentifier);
+    state.numbers.push({ value: decimalValue.toString(), id: state.id });
     state.id++;
   } else {
     state.errorMessage =
