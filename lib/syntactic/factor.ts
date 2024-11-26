@@ -45,7 +45,9 @@ export const factor = (
         "4"
       ) ||
       match(tokens, position - 1, "true") ||
-      match(tokens, position - 1, "false");
+      match(tokens, position - 1, "false") ||
+      match(tokens, position - 1, "(") ||
+      match(tokens, position - 1, ")");
 
     if (!validAfterRecursion) {
       throw new Error(
@@ -84,8 +86,8 @@ export const factor = (
   }
 
   if (tokens[position].value === "true" || tokens[position].value === "false") {
+    position++;
     return position;
   }
-
   return position;
 };

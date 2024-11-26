@@ -31,6 +31,7 @@ export const assignments = (
   const hasPositionChanged = position;
 
   position = expression(tokens, position, tokensMapping);
+
   if (hasPositionChanged === position) {
     throw new Error(`Ожидается выражение`);
   }
