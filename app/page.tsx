@@ -7,7 +7,12 @@ import { separators, keywords } from "@/lib/constants";
 import { useState } from "react";
 
 import { ResultValue, Value } from "@/@types/value";
-import { createIdMapping, filterCharacters, parseSyntax } from "@/lib";
+import {
+  createIdMapping,
+  filterCharacters,
+  parseSemantical,
+  parseSyntax,
+} from "@/lib";
 import { useCodeFormatter } from "@/hooks";
 
 export interface analysisResult {
@@ -46,6 +51,16 @@ export default function Home() {
           sortedCharacters
         );
         if (syntaxResult?.success) {
+          const semanticalResult = parseSemantical(
+            filteredCharacters.allElements,
+            sortedCharacters
+          );
+          console.log("semanticalResult: ", semanticalResult);
+
+          if (semanticalResult.success) {
+          } else {
+            setErrorMesage(String(semanticalResult.errorMessage));
+          }
         } else {
           setErrorMesage(String(syntaxResult?.errorMessage));
         }
