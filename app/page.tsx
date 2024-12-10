@@ -6,8 +6,8 @@ import { TextareaResult } from "@/components/shared/textarea-result";
 import { separators, keywords } from "@/lib/constants";
 import { useState } from "react";
 
-import { ResultValue, Value, ValueMapping } from "@/@types/value";
-import { createIdMapping, filterCharacters, program } from "@/lib";
+import { ResultValue, Value } from "@/@types/value";
+import { createIdMapping, filterCharacters, parseSyntax } from "@/lib";
 import { useCodeFormatter } from "@/hooks";
 
 export interface analysisResult {
@@ -49,18 +49,6 @@ export default function Home() {
         } else {
           setErrorMesage(String(syntaxResult?.errorMessage));
         }
-      }
-    }
-  };
-
-  const parseSyntax = (tokens: Value[], tokensMapping: ValueMapping[]) => {
-    try {
-      const position = 0;
-      const result = program(tokens, position, tokensMapping);
-      return { success: true, position: result.position, errorMessage: "" };
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        return { success: false, errorMessage: error.message };
       }
     }
   };

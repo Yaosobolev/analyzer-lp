@@ -20,3 +20,4 @@ export { input } from "./input";
 export { output } from "./output";
 export { listExpressions } from "./list-expressions";
 export { composite } from "./composite";
+export { parseSyntax } from "./parse-syntax";
