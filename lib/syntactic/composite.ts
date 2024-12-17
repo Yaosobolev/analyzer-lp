@@ -7,7 +7,8 @@ import { operator } from "./operator";
 export const composite = (
   tokens: Value[],
   position: number,
-  tokensMapping: ValueMapping[]
+  tokensMapping: ValueMapping[],
+  identifiers: Value[]
 ): number => {
   const firstKeyword = consume(tokens, position, "[");
 
@@ -18,7 +19,7 @@ export const composite = (
   }
   position++;
 
-  position = operator(tokens, position, tokensMapping);
+  position = operator(tokens, position, tokensMapping, identifiers);
 
   while (
     match(tokens, position, ":") ||
@@ -36,7 +37,8 @@ export const composite = (
     const otherOperator = (position = operator(
       tokens,
       position,
-      tokensMapping
+      tokensMapping,
+      identifiers
     ));
 
     if (!otherOperator) {

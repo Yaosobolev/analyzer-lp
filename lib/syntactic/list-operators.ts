@@ -6,13 +6,21 @@ import { match } from "./match";
 export const listOperators = (
   tokens: Value[],
   position: number,
-  tokensMapping: ValueMapping[]
+  tokensMapping: ValueMapping[],
+  identifiers: Value[],
+  conditionalResult?: string
 ) => {
   if (!tokens.find((item) => item.value.toLocaleLowerCase() === "end.")) {
     return position;
   }
   while (tokens[position].value !== "end.") {
-    position = operator(tokens, position, tokensMapping);
+    position = operator(
+      tokens,
+      position,
+      tokensMapping,
+      identifiers,
+      conditionalResult
+    );
 
     if (match(tokens, position, "else")) {
       return position;

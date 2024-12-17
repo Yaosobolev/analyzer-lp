@@ -6,7 +6,8 @@ import { listOperators } from "./list-operators";
 export const conditional = (
   tokens: Value[],
   position: number,
-  tokensMapping: ValueMapping[]
+  tokensMapping: ValueMapping[],
+  identifiers: Value[]
 ): number => {
   const firstKeyword = match(tokens, position, "if");
 
@@ -19,7 +20,20 @@ export const conditional = (
 
   const hasFirstPositionChanged = position;
 
-  position = expression(tokens, position, tokensMapping);
+  const { position: newPosition, value: newValue } = expression(
+    tokens,
+    position,
+    tokensMapping,
+    identifiers
+  );
+
+  position = newPosition;
+
+  if (newValue !== "true" && newValue !== "false") {
+    throw new Error(
+      `Ожидается логическое выражение в позиции ${position}, но найдено "${newValue}"`
+    );
+  }
   if (hasFirstPositionChanged === position) {
     throw new Error(`Ожидается выражение`);
   }
@@ -35,16 +49,30 @@ export const conditional = (
 
   const hasSecondPositionChanged = position;
 
-  position = listOperators(tokens, position, tokensMapping);
+  position = listOperators(
+    tokens,
+    position,
+    tokensMapping,
+    identifiers,
+    newValue
+  );
   if (hasSecondPositionChanged === position) {
     throw new Error(`Ожидается оператор`);
   }
 
   const hasThirdPositionChanged = position;
 
+  const conditionalErrorResult = newValue === "true" ? "false" : "true";
+
   if (match(tokens, position, "else")) {
     position++;
-    position = listOperators(tokens, position, tokensMapping);
+    position = listOperators(
+      tokens,
+      position,
+      tokensMapping,
+      identifiers,
+      conditionalErrorResult
+    );
     if (hasThirdPositionChanged === position) {
       throw new Error(`Ожидается оператор`);
     }

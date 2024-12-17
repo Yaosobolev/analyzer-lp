@@ -7,7 +7,9 @@ import { listExpressions } from "./list-expressions";
 export const output = (
   tokens: Value[],
   position: number,
-  tokensMapping: ValueMapping[]
+  tokensMapping: ValueMapping[],
+  identifiers: Value[]
+  // outputValue?: { value: string }[]
 ): number => {
   const firstKeyword = match(tokens, position, "write");
 
@@ -22,7 +24,24 @@ export const output = (
 
   const hasSecondPositionChanged = position;
 
-  position = listExpressions(tokens, tokensMapping, position);
+  const { position: newPosition, value: newValue } = listExpressions(
+    tokens,
+    tokensMapping,
+    position,
+    identifiers
+  );
+
+  position = newPosition;
+  // outputValue = [
+  //   ...(outputValue || []),
+  //   ...newValue.map((item) => ({ value: item })),
+  // ];
+  console.log("outputValue: ", newValue);
+  if (newValue.length > 0) {
+    alert("Значения: \n" + newValue.join("\n"));
+  }
+
+  // console.log("newValue: ", newValue);
   if (hasSecondPositionChanged === position) {
     throw new Error(`Ожидается выражение`);
   }

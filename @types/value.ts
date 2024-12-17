@@ -1,6 +1,9 @@
 export interface Value {
   id: number;
   value: string;
+  type?: string;
+  variableValue?: string;
+  declared?: boolean;
 }
 
 export interface ValueMapping {

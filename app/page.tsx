@@ -7,12 +7,7 @@ import { separators, keywords } from "@/lib/constants";
 import { useState } from "react";
 
 import { ResultValue, Value } from "@/@types/value";
-import {
-  createIdMapping,
-  filterCharacters,
-  parseSemantical,
-  parseSyntax,
-} from "@/lib";
+import { createIdMapping, filterCharacters, parseSyntax } from "@/lib";
 import { useCodeFormatter } from "@/hooks";
 
 export interface analysisResult {
@@ -29,6 +24,9 @@ export default function Home() {
   const [numbers, setNumbers] = useState<Value[]>([]);
   const [result, setResult] = useState<ResultValue[]>([]);
   const [errorMesage, setErrorMesage] = useState<string>("");
+  const [resultProgram, setResultProgram] = useState<Value[]>([]);
+  console.log("resultProgram: ", resultProgram);
+  // console.log("resultProgram: ", resultProgram);
 
   const { code, onChangeCode } = useCodeFormatter();
 
@@ -48,19 +46,24 @@ export default function Home() {
       if (filteredCharacters.errorMessage === "") {
         const syntaxResult = parseSyntax(
           filteredCharacters.allElements,
-          sortedCharacters
+          sortedCharacters,
+          [...filteredCharacters?.identifiers]
         );
         if (syntaxResult?.success) {
-          const semanticalResult = parseSemantical(
-            filteredCharacters.allElements,
-            sortedCharacters
-          );
-          console.log("semanticalResult: ", semanticalResult);
+          setResultProgram([...syntaxResult.tokens]);
+          // if (syntaxResult?.tokens?.length > 0) {
 
-          if (semanticalResult.success) {
-          } else {
-            setErrorMesage(String(semanticalResult.errorMessage));
-          }
+          // }
+          // const semanticalResult = parseSemantical(
+          //   filteredCharacters.allElements,
+          //   sortedCharacters
+          // );
+          console.log("semanticalResult: ", syntaxResult);
+
+          // if (semanticalResult?.success) {
+          // } else {
+          //   setErrorMesage(String(semanticalResult?.errorMessage));
+          // }
         } else {
           setErrorMesage(String(syntaxResult?.errorMessage));
         }

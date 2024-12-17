@@ -7,8 +7,11 @@ import { assignments } from "./assignments";
 export const fixedlLoop = (
   tokens: Value[],
   position: number,
-  tokensMapping: ValueMapping[]
+  tokensMapping: ValueMapping[],
+  identifiers: Value[]
 ): number => {
+  let iterations = 0;
+  console.log("tokens: ", tokens);
   const firstKeyword = match(tokens, position, "for");
 
   if (!firstKeyword) {
@@ -20,7 +23,7 @@ export const fixedlLoop = (
 
   const hasFirstPositionChanged = position;
 
-  position = assignments(tokens, position, tokensMapping);
+  position = assignments(tokens, position, tokensMapping, identifiers);
   if (hasFirstPositionChanged === position) {
     throw new Error(`Ожидается присваивание`);
   }
@@ -34,26 +37,59 @@ export const fixedlLoop = (
   }
   position++;
 
-  const hasSecondPositionChanged = position;
+  while (true) {
+    if (iterations > 500) {
+      throw new Error("Зацикливание обнаружено: превышен лимит итераций.");
+    }
+    let tempPosition = position;
 
-  position = expression(tokens, position, tokensMapping);
-  if (hasSecondPositionChanged === position) {
-    throw new Error(`Ожидается выражение`);
-  }
+    const hasSecondPositionChanged = tempPosition;
 
-  const thirdKeyword = match(tokens, position, "do");
-  if (!thirdKeyword) {
-    throw new Error(
-      `Ожидается "do" в позиции ${position}, но найдено ${tokens[position].value}`
+    const { position: newPosition, value: newValue } = expression(
+      tokens,
+      tempPosition,
+      tokensMapping,
+      identifiers
     );
-  }
-  position++;
+    tempPosition = newPosition;
+    if (hasSecondPositionChanged === tempPosition) {
+      throw new Error(`Ожидается выражение`);
+    }
 
-  const hasThirdPositionChanged = position;
+    if (newValue !== "true" && newValue !== "false") {
+      throw new Error(
+        `Ожидается логическое выражение в позиции ${tempPosition}"`
+      );
+    }
 
-  position = listOperators(tokens, position, tokensMapping);
-  if (hasThirdPositionChanged === position) {
-    throw new Error(`Ожидается оператор`);
+    tempPosition = newPosition;
+
+    const thirdKeyword = match(tokens, tempPosition, "do");
+    if (!thirdKeyword) {
+      throw new Error(
+        `Ожидается "do" в позиции ${tempPosition}, но найдено ${tokens[tempPosition].value}`
+      );
+    }
+    tempPosition++;
+
+    const hasThirdPositionChanged = tempPosition;
+
+    const conditionalErrorResult = newValue === "true" ? "true" : "false";
+    tempPosition = listOperators(
+      tokens,
+      tempPosition,
+      tokensMapping,
+      identifiers,
+      conditionalErrorResult
+    );
+    if (hasThirdPositionChanged === tempPosition) {
+      throw new Error(`Ожидается оператор`);
+    }
+    if (newValue === "false") {
+      position = tempPosition;
+      break;
+    }
+    iterations++;
   }
 
   return position;

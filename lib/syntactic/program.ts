@@ -14,16 +14,30 @@ const filterTokensMapping = (tokens: ValueMapping[]): ValueMapping[] => {
 export const program = (
   tokens: Value[],
   position: number,
-  tokensMapping: ValueMapping[]
+  tokensMapping: ValueMapping[],
+  identifiers: Value[]
+  // outputValue: { value: string }[]
 ) => {
   const filteredTokens = filterTokens(tokens);
   const filteredTokensMapping = filterTokensMapping(tokensMapping);
 
   position = consume(filteredTokens, position, "program");
   position = consume(filteredTokens, position, "var");
-  position = description(filteredTokens, position, filteredTokensMapping); // Разбор Opis
+  const { position: newPosition, identifiers: newIdentifiers } = description(
+    filteredTokens,
+    position,
+    filteredTokensMapping,
+    identifiers
+  ); // Разбор Opis
+
+  position = newPosition;
   position = consume(filteredTokens, position, "begin");
-  position = listOperators(filteredTokens, position, filteredTokensMapping); // Разбор SOper
+  position = listOperators(
+    filteredTokens,
+    position,
+    filteredTokensMapping,
+    newIdentifiers
+  ); // Разбор SOper
   position = consume(tokens, tokens.length - 1, "end.");
-  return { position };
+  return { position, newIdentifiers };
 };

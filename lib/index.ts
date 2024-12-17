@@ -1,6 +1,5 @@
 export * from "./lexical";
 export * from "./syntactic";
-export * from "./semantical";
 export { createIdMapping } from "./create-id-mapping";
 
 export { isBynarial } from "./is-bynarial";
