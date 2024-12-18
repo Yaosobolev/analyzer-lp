@@ -36,7 +36,7 @@ export const listTerms = (
       identifiers
     );
     position = newPosition;
-    switch (action) {
+    switch (action.toLocaleLowerCase()) {
       case "mult":
         value = (Number(value) * Number(newValue)).toString();
         break;

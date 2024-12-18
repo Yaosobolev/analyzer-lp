@@ -44,7 +44,7 @@ export const expression = (
     );
     position = newPosition;
 
-    switch (action) {
+    switch (action.toLocaleLowerCase()) {
       case "ne":
         value = (Number(value) !== Number(newValue)).toString();
         break;

@@ -37,7 +37,7 @@ export const listOperands = (
     );
     position = newPosition;
 
-    switch (action) {
+    switch (action.toLocaleLowerCase()) {
       case "plus":
         value = (Number(value) + Number(newValue)).toString();
         break;
