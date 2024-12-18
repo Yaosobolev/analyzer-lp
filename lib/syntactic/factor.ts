@@ -49,7 +49,8 @@ export const factor = (
       identifiers
     );
     position = newPosition;
-    value = newValue;
+    value = newValue === "true" ? "false" : "true";
+    console.log("newValue: ", newValue);
 
     // Проверяем, что рекурсия завершилась идентификатором или числом
     const validAfterRecursion =
@@ -59,12 +60,12 @@ export const factor = (
         String(tokensMapping[position - 1]?.idTable),
         "3"
       ) ||
-      match(
-        tokens,
-        position,
-        String(tokensMapping[position - 1]?.idTable),
-        "4"
-      ) ||
+      // match(
+      //   tokens,
+      //   position,
+      //   String(tokensMapping[position - 1]?.idTable),
+      //   "4"
+      // ) ||
       match(tokens, position - 1, "true") ||
       match(tokens, position - 1, "false") ||
       match(tokens, position - 1, "(") ||
@@ -72,7 +73,7 @@ export const factor = (
 
     if (!validAfterRecursion) {
       throw new Error(
-        `Ожидается идентификатор, число, логическая константа после "~"`
+        `Ожидается идентификатор или логическая константа после "~"`
       );
     }
 
