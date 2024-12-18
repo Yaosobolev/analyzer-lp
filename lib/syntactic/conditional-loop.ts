@@ -18,7 +18,6 @@ export const conditionalLoop = (
     );
   }
   position++;
-  console.log("цикл начался");
 
   while (true) {
     if (iterations > 500) {
@@ -69,12 +68,13 @@ export const conditionalLoop = (
       throw new Error(`Ожидается оператор`);
     }
     if (newValue === "false") {
-      position = tempPosition;
-      break;
+      // position = tempPosition;
+      // break;
+      return tempPosition;
     }
     iterations++;
   }
-  console.log("цикл закончился");
+  // console.log("цикл закончился");
 
-  return position;
+  // return position;
 };

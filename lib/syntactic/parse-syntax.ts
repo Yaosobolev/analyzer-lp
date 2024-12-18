@@ -8,7 +8,7 @@ export const parseSyntax = (
 ) => {
   try {
     const position = 0;
-    // let outputValue: { value: string }[] = [{ value: "" }];
+    localStorage.setItem("outputValues", "");
     const result = program(tokens, position, tokensMapping, identifiers);
 
     return {

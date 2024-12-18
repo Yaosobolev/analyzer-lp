@@ -8,8 +8,8 @@ export const output = (
   tokens: Value[],
   position: number,
   tokensMapping: ValueMapping[],
-  identifiers: Value[]
-  // outputValue?: { value: string }[]
+  identifiers: Value[],
+  conditionalResult?: string
 ): number => {
   const firstKeyword = match(tokens, position, "write");
 
@@ -36,9 +36,19 @@ export const output = (
   //   ...(outputValue || []),
   //   ...newValue.map((item) => ({ value: item })),
   // ];
-  console.log("outputValue: ", newValue);
-  if (newValue.length > 0) {
-    alert("Значения: \n" + newValue.join("\n"));
+
+  if (conditionalResult === "true" || !conditionalResult) {
+    if (newValue.length > 0) {
+      const prevData = localStorage.getItem("outputValues") || "";
+      localStorage.setItem(
+        "outputValues",
+        prevData + "\n" + newValue.join(", ")
+      );
+
+      // outputValue?.push({ value: newValue.join("\n") });
+
+      // alert("Значения: \n" + newValue.join("\n"));
+    }
   }
 
   // console.log("newValue: ", newValue);

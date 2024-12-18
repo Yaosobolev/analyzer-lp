@@ -14,11 +14,16 @@ export const operator = (
   tokensMapping: ValueMapping[],
   identifiers: Value[],
   conditionalResult?: string
-  // outputValue?: { value: string }[]
 ): number => {
   // Последовательно проверяем каждый вариант EOper
   if (match(tokens, position, "[")) {
-    return composite(tokens, position, tokensMapping, identifiers);
+    return composite(
+      tokens,
+      position,
+      tokensMapping,
+      identifiers,
+      conditionalResult
+    );
   } else if (
     match(tokens, position, String(tokensMapping[position].idTable), "3")
   ) {
@@ -30,15 +35,39 @@ export const operator = (
       conditionalResult
     );
   } else if (match(tokens, position, "if")) {
-    return conditional(tokens, position, tokensMapping, identifiers);
+    return conditional(
+      tokens,
+      position,
+      tokensMapping,
+      identifiers,
+      conditionalResult
+    );
   } else if (match(tokens, position, "for")) {
-    return fixedlLoop(tokens, position, tokensMapping, identifiers);
+    return fixedlLoop(
+      tokens,
+      position,
+      tokensMapping,
+      identifiers,
+      conditionalResult
+    );
   } else if (match(tokens, position, "while")) {
     return conditionalLoop(tokens, position, tokensMapping, identifiers);
   } else if (match(tokens, position, "read")) {
-    return input(tokens, position, tokensMapping, identifiers);
+    return input(
+      tokens,
+      position,
+      tokensMapping,
+      identifiers,
+      conditionalResult
+    );
   } else if (match(tokens, position, "write")) {
-    return output(tokens, position, tokensMapping, identifiers);
+    return output(
+      tokens,
+      position,
+      tokensMapping,
+      identifiers,
+      conditionalResult
+    );
   }
 
   throw new Error(

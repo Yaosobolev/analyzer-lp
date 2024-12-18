@@ -44,8 +44,6 @@ export const listTerms = (
         value = (Number(value) / Number(newValue)).toString();
         break;
       case "and":
-        console.log(value);
-        console.log(newValue);
         const leftBool = value === "true" ? true : false;
         const rightBool = newValue === "true" ? true : false;
 

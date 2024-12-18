@@ -8,10 +8,10 @@ export const fixedlLoop = (
   tokens: Value[],
   position: number,
   tokensMapping: ValueMapping[],
-  identifiers: Value[]
+  identifiers: Value[],
+  conditionalResult?: string
 ): number => {
   let iterations = 0;
-  console.log("tokens: ", tokens);
   const firstKeyword = match(tokens, position, "for");
 
   if (!firstKeyword) {
@@ -23,7 +23,13 @@ export const fixedlLoop = (
 
   const hasFirstPositionChanged = position;
 
-  position = assignments(tokens, position, tokensMapping, identifiers);
+  position = assignments(
+    tokens,
+    position,
+    tokensMapping,
+    identifiers,
+    conditionalResult
+  );
   if (hasFirstPositionChanged === position) {
     throw new Error(`Ожидается присваивание`);
   }
@@ -86,11 +92,12 @@ export const fixedlLoop = (
       throw new Error(`Ожидается оператор`);
     }
     if (newValue === "false") {
-      position = tempPosition;
-      break;
+      // position = tempPosition;
+      return tempPosition;
+      // break;
     }
     iterations++;
   }
 
-  return position;
+  // return position;
 };

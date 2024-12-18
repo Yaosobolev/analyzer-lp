@@ -15,7 +15,6 @@ export const assignments = (
     String(tokensMapping[position].idTable),
     "3"
   );
-  console.log("identifiers: ", identifiers);
 
   let identifierId = 0;
   if (!identifier) {
@@ -53,29 +52,29 @@ export const assignments = (
 
   if (conditionalResult !== "false") {
     identifiers[identifierId].variableValue = newValue;
-  }
 
-  const variableValue = identifiers[identifierId].variableValue;
+    const variableValue = identifiers[identifierId].variableValue;
 
-  const variableType = identifiers[identifierId].type;
+    const variableType = identifiers[identifierId].type;
 
-  // Преобразуем значение в число
-  const numericValue = Number(variableValue);
-  const isInteger = Number.isInteger(numericValue);
+    // Преобразуем значение в число
+    const numericValue = Number(variableValue);
+    const isInteger = Number.isInteger(numericValue);
 
-  if (
-    (variableType === "int" && isInteger) ||
-    (variableType === "float" &&
-      !Number.isInteger(numericValue) &&
-      numericValue) ||
-    (variableType === "bool" &&
-      (variableValue === "true" || variableValue === "false"))
-  ) {
-    // Все нормально
-  } else {
-    throw new Error(
-      `Неправильный тип переменной. Ожидался тип "${variableType}", но получено значение "${variableValue}".`
-    );
+    if (
+      (variableType === "int" && isInteger) ||
+      (variableType === "float" &&
+        !Number.isInteger(numericValue) &&
+        numericValue) ||
+      (variableType === "bool" &&
+        (variableValue === "true" || variableValue === "false"))
+    ) {
+      // Все нормально
+    } else {
+      throw new Error(
+        `Неправильный тип переменной. Ожидался тип "${variableType}", но получено значение "${variableValue}".`
+      );
+    }
   }
 
   if (hasPositionChanged === position) {

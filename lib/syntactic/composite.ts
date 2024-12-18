@@ -8,7 +8,8 @@ export const composite = (
   tokens: Value[],
   position: number,
   tokensMapping: ValueMapping[],
-  identifiers: Value[]
+  identifiers: Value[],
+  conditionalResult?: string
 ): number => {
   const firstKeyword = consume(tokens, position, "[");
 
@@ -19,7 +20,13 @@ export const composite = (
   }
   position++;
 
-  position = operator(tokens, position, tokensMapping, identifiers);
+  position = operator(
+    tokens,
+    position,
+    tokensMapping,
+    identifiers,
+    conditionalResult
+  );
 
   while (
     match(tokens, position, ":") ||
@@ -38,7 +45,8 @@ export const composite = (
       tokens,
       position,
       tokensMapping,
-      identifiers
+      identifiers,
+      conditionalResult
     ));
 
     if (!otherOperator) {

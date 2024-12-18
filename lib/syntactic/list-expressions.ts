@@ -19,9 +19,7 @@ export const listExpressions = (
   value.push(newValue);
 
   position = firstExpression;
-  console.log("tokens: ", tokens);
   // const firstExpression = newPosition;
-  console.log("firstExpression: ", firstExpression);
   if (!firstExpression) {
     throw new Error(
       `Ожидается выражение в позиции ${position}, но найдено ${tokens[position].value}`

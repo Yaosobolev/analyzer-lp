@@ -9,6 +9,7 @@ import { useState } from "react";
 import { ResultValue, Value } from "@/@types/value";
 import { createIdMapping, filterCharacters, parseSyntax } from "@/lib";
 import { useCodeFormatter } from "@/hooks";
+import { toast } from "sonner";
 
 export interface analysisResult {
   identifiers: Value[];
@@ -26,7 +27,11 @@ export default function Home() {
   const [errorMesage, setErrorMesage] = useState<string>("");
   const [resultProgram, setResultProgram] = useState<Value[]>([]);
   console.log("resultProgram: ", resultProgram);
-  // console.log("resultProgram: ", resultProgram);
+
+  const outputValues =
+    typeof window !== "undefined"
+      ? localStorage.getItem("outputValues")?.slice(1) || ""
+      : "";
 
   const { code, onChangeCode } = useCodeFormatter();
 
@@ -51,19 +56,8 @@ export default function Home() {
         );
         if (syntaxResult?.success) {
           setResultProgram([...syntaxResult.tokens]);
-          // if (syntaxResult?.tokens?.length > 0) {
-
-          // }
-          // const semanticalResult = parseSemantical(
-          //   filteredCharacters.allElements,
-          //   sortedCharacters
-          // );
-          console.log("semanticalResult: ", syntaxResult);
-
-          // if (semanticalResult?.success) {
-          // } else {
-          //   setErrorMesage(String(semanticalResult?.errorMessage));
-          // }
+          toast.success("Синтаксический анализ завершен успешно");
+          toast.success("Семантический анализ завершен успешно");
         } else {
           setErrorMesage(String(syntaxResult?.errorMessage));
         }
@@ -86,9 +80,19 @@ export default function Home() {
       <div className="w-1/2">
         <Button onClick={() => analysis(code)}>Начать</Button>
       </div>
-      <div className="flex gap-4 w-full">
+      <div className="flex gap-4 w-full md:flex-nowrap flex-wrap">
         <TextareaCode onChangeCode={onChangeCode} />
-        <TextareaResult result={result} errorMessage={errorMesage} />
+        <TextareaResult
+          result={outputValues}
+          errorMessage={errorMesage}
+          title="Результат"
+          type={1}
+        />
+        <TextareaResult
+          result={result}
+          errorMessage={errorMesage}
+          title="Результат лексического анализа"
+        />
       </div>
     </Container>
   );

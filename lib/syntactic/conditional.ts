@@ -7,7 +7,8 @@ export const conditional = (
   tokens: Value[],
   position: number,
   tokensMapping: ValueMapping[],
-  identifiers: Value[]
+  identifiers: Value[],
+  conditionalResult?: string
 ): number => {
   const firstKeyword = match(tokens, position, "if");
 
@@ -49,12 +50,15 @@ export const conditional = (
 
   const hasSecondPositionChanged = position;
 
+  const conditionalSuccessResult =
+    conditionalResult === "false" ? "false" : newValue;
+
   position = listOperators(
     tokens,
     position,
     tokensMapping,
     identifiers,
-    newValue
+    conditionalSuccessResult
   );
   if (hasSecondPositionChanged === position) {
     throw new Error(`Ожидается оператор`);
@@ -62,7 +66,14 @@ export const conditional = (
 
   const hasThirdPositionChanged = position;
 
-  const conditionalErrorResult = newValue === "true" ? "false" : "true";
+  const conditionalErrorResult =
+    conditionalResult === "false"
+      ? "false"
+      : newValue === "true"
+      ? "false"
+      : "true";
+
+  // const conditionalErrorResult = newValue === "true" ? "false" : "true";
 
   if (match(tokens, position, "else")) {
     position++;

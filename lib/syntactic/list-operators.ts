@@ -10,9 +10,16 @@ export const listOperators = (
   identifiers: Value[],
   conditionalResult?: string
 ) => {
+  let endProgram = 0;
+  for (let i = 0; i < tokens.length; i++) {
+    if (tokens[i].value === "end.") {
+      endProgram = i;
+    }
+  }
   if (!tokens.find((item) => item.value.toLocaleLowerCase() === "end.")) {
     return position;
   }
+
   while (tokens[position].value !== "end.") {
     position = operator(
       tokens,
@@ -27,8 +34,24 @@ export const listOperators = (
     }
 
     if (
-      tokens[position + 1]?.value === "end." &&
+      position + 1 === endProgram &&
+      // tokens[position + 1]?.value === "end." &&
       tokens[position]?.value === ";"
+    ) {
+      return position;
+    }
+
+    if (
+      tokens[position - 1].value === "]" &&
+      // || tokens[position].value === "]"
+
+      conditionalResult
+    ) {
+      return position;
+    }
+    if (
+      // tokens[position].value === ";" &&
+      conditionalResult
     ) {
       return position;
     }

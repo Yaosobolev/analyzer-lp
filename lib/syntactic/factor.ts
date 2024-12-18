@@ -16,8 +16,7 @@ export const factor = (
     String(tokensMapping[position].idTable),
     "3"
   );
-  console.log("identifier: ", identifier);
-  console.log("tokens: ", tokens[position]);
+
   const number = match(
     tokens,
     position,
@@ -25,12 +24,8 @@ export const factor = (
     "4"
   );
 
-  if (identifier) {
-    // console.log(
-    //   "identifiers.find((item) => item.value === tokens[position].value): ",
-    //   identifiers.find((item) => item.value === tokens[position].value)
-    // );
-    console.log(identifiers);
+  // !number для фикса ошибки при назначении в write(4)
+  if (identifier && !number) {
     const identifierValue =
       identifiers.find((item) => item.value === tokens[position].value)
         ?.variableValue ||
