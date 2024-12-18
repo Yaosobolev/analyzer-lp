@@ -50,7 +50,6 @@ export const factor = (
     );
     position = newPosition;
     value = newValue === "true" ? "false" : "true";
-    console.log("newValue: ", newValue);
 
     // Проверяем, что рекурсия завершилась идентификатором или числом
     const validAfterRecursion =
